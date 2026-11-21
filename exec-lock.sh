@@ -23,13 +23,13 @@ msg_logger () {
 
     case "$sev_cd" in
         I)
-            logger "$self [INFO]: $log_msg"    
+            logger -p user.err "$self [INFO]: $log_msg"    
             ;;
         W)
-            logger "$self [WARNING]: $log_msg"    
+            logger -p user.err "$self [WARNING]: $log_msg"    
             ;;
         E)
-            logger "$self [ERROR]: $(cat $err_file)"
+            logger -p user.err "$self [ERROR]: $(cat $err_file)"
             ;;
     esac    
 }
