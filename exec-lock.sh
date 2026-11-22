@@ -29,7 +29,7 @@ msg_logger () {
             logger -p user.err "$self [WARNING]: $log_msg"    
             ;;
         E)
-            logger -p user.err "$self [ERROR]: $(cat $err_file)"
+            logger -p user.err "$self [ERROR]: $log_msg"
             ;;
     esac    
 }
@@ -48,25 +48,17 @@ b_name=$(basename "$sh_full_path")
 #Get directory of the target script
 d_name=$(dirname "$sh_full_path") 
 
-#Prepare error file
-err_dir="$d_name/log"
-mkdir -p "$err_dir"
-err_file="$err_dir/exec-lock.$b_name.err"
-echo -n > "$err_file" #create an empty file
-
 #Check if script exists
 if [ -f "$sh_full_path" ]; then
     alias=$(grep -oE "#SCRIPT-ALIAS:.*" "$sh_full_path" | awk 'NR==1 {print}' | awk -F: '{print $2}')
 else
-    echo "$sh_full_path: Does not exists." >> "$err_file"
-    msg_logger "E"
+    msg_logger "E" "$sh_full_path: Does not exists."
     exit 1
 fi
 
 #Check if script is executable
 if [ ! -x "$sh_full_path" ]; then
-    echo "$sh_full_path: No exec permission." >> "$err_file"
-    msg_logger "E"
+    msg_logger "E" "$sh_full_path: No exec permission."
     exit 1
 fi
 
@@ -116,10 +108,10 @@ else
     logstart="$alias launched at $startdttm $delay_start"    
     msg_logger "I" "$logstart"
 
-    $sh_full_path 2> "$err_file" 
+    cmd_out=$($sh_full_path 2>&1)
 
     if [ "$?" -ne 0 ]; then
-        msg_logger "E"
+        msg_logger "E" "$cmd_out"
     fi
 
     enddttm=$(date)
